@@ -1,0 +1,11 @@
+
+	- cd database
+	- docker build -t wynnt3o/nwdb:v1 .
+	- docker volume create nwvol
+	
+	- cd server
+	- docker build -t wynnt3o/nwapp:v1 .
+	- docker network create nwnet
+	
+	- docker run -d --network nwnet --name nwdb -v nwvol:/var/lib/mysql wynnt3o/nwdb:v1
+	- docker run -d -p 80:3000 --name nwapp --network nwnet wynnt3o/nwapp:v1
