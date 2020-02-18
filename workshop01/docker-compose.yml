@@ -13,7 +13,6 @@ services:
       context: ./database
     environment:
     - MYSQL_ROOT_PASSWORD=changeit
-    - MYSQL_DATABASE=northwind
     networks:
     - nwnet
     volumes:
@@ -24,7 +23,7 @@ services:
     build:
       context: ./server
     environment:
-    - DB_HOST=nwdb
+    - DB_HOST=nwdb 
     - DB_PORT=3306
     - DB_USER=root
     - DB_PASSWORD=changeit
