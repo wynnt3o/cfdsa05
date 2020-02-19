@@ -12,25 +12,25 @@ services:
     build: 
       context: ./database
     environment:
-    - MYSQL_ROOT_PASSWORD=changeit
+      - MYSQL_ROOT_PASSWORD=changeit
     networks:
-    - nwnet
+      - nwnet
     volumes:
-    - nwvol:/var/lib/mysql
+      - nwvol:/var/lib/mysql
 
   nwapp:
     image: wynnt3o/nwapp:v1
     build:
       context: ./server
     environment:
-    - DB_HOST=nwdb 
-    - DB_PORT=3306
-    - DB_USER=root
-    - DB_PASSWORD=changeit
+      - DB_HOST=nwdb
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=changeit
     networks:
-    - nwnet
+      - nwnet
     ports:
-    - 80:3000
+      - 80:3000
   
 
   

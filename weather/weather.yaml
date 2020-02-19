@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weather-cm
+  labels:
+    name: weather-cm
+data:
+  APP_DEFAULT_CITY: singapore
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: weather-secret
+data:
+  APP_ID: YTgzZDk3ZDQ2Y2E3OGYxOWRmZGI2N2VmNGZiMWZiMWI=
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-deploy
+  namespace: default
+  labels:
+    name: weather-deploy
+    version: "v1"
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: weather-pod
+  template:
+    metadata:
+      name: weather-pod
+      labels:
+        name: weather-pod
+    spec:
+      containers:
+      - name: weather-container
+        image: stackupiss/weather:v1
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: weather-cm
+          - secretRef:
+              name: weather-secret
+        ports:
+          - name: weather-http
+            containerPort: 3000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-service
+  labels:
+    name: weather-service
+spec:
+  type: LoadBalancer
+  selector:
+    name: weather-pod
+  ports:
+    - name: http
+      port: 80
+      targetPort: weather-http
+
+---

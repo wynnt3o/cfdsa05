@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-cm
+  namespace: myns
+  labels:
+    name: myapp-cm
+data:
+  DB_HOST: mydb-svc.myns.svc.cluster.local 
+  DB_USER: root
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deploy
+  namespace: myns
+  labels:
+    name: myapp-deploy
+    version: "v1"
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: myapp-pod
+  template:
+    metadata:
+      name: myapp-pod
+      namespace: myns
+      labels:
+        name: myapp-pod
+    spec:
+      containers:
+      - name: myapp-container
+        image: stackupiss/northwind-app:v1
+        imagePullPolicy: Always
+        env:
+          - name: INSTANCE_IP_ADDRESS
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: DB_PASSOWRD
+            valueFrom:
+              secretKeyRef:
+                name: mydb-secret
+                key: MYSQL_ROOT_PASSWORD
+        envFrom:
+          - configMapRef:
+              name: myapp-cm
+        ports:
+          - name: myapp-http
+            containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: myapp-http
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: myapp-http
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-svc
+  namespace: myns
+  labels:
+    name: myapp-svc
+spec:
+  type: LoadBalancer
+  selector:
+    name: myapp-pod
+  ports:
+    - name: http
+      port: 80
+      targetPort: myapp-http
+
+---

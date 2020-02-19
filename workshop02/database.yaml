@@ -1,0 +1,79 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myns
+  labels:
+    name: myns
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: myns
+  name: mydb-cm
+  labels:
+    name: mydb-cm
+data:
+  MYSQL_DATABASE: northwind
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: myns
+  name: mydb-secret
+data:
+  MYSQL_ROOT_PASSWORD: Y2hhbmdlaXQ=
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydb-deploy
+  namespace: myns
+  labels:
+    name: mydb-deploy
+    version: "v1"
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mydb-pod
+  template:
+    metadata:
+      name: mydb-pod
+      namespace: myns
+      labels:
+        name: mydb-pod
+    spec:
+      containers:
+      - name: mydb
+        image: stackupiss/northwind-db:v1
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: mydb-cm
+          - secretRef:
+              name: mydb-secret
+        ports:
+          - name: mydb-port
+            containerPort: 3306
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydb-svc
+  namespace: myns
+  labels:
+    name: mydb-svc
+spec:
+  type: ClusterIP
+  selector:
+    name: mydb-pod
+  ports:
+    - port: 3306
+      targetPort: mydb-port
+
+---
