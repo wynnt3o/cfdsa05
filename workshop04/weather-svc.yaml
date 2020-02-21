@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wapp-svc
+spec:
+  type: ClusterIP
+  selector:
+    name: wapp
+  ports:
+    - port: 80
+      targetPort: 3000

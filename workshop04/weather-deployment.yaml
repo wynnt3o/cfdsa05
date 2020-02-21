@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wapp-deployment
+  labels:
+    name: wapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: wapp
+  template:
+    metadata:
+      labels:
+        name: wapp
+    spec:
+      containers:
+      - name: wapp
+        image: stackupiss/weather:v1
+        imagePullPolicy: Always
+        env:
+          - name: APP_ID
+            value: a83d97d46ca78f19dfdb67ef4fb1fb1b
+        ports:
+          - containerPort: 3000
